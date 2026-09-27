@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Airline Operations Console</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!--
+  PAGE STRUCTURE
+  ==============
+  The site is ONE continuous scroll.  Every <section class="page"> has:
+    1. a full-screen .hero  - a photo or video from frontend/media/, a big headline,
+       one line of caption, and a scroll cue.
+    2. a .content block     - the tables / forms / logs, revealed by scrolling.
+
+  MEDIA
+  =====
+  Each hero looks for two files in frontend/media/ named after the page:
+      media/<page>.jpg   the photo (always needed - it is also the video's poster)
+      media/<page>.mp4   optional looping video; if the file is missing the photo shows
+  Pages: overview, records, operations, scenarios, journal, report, design.
+  To use your own media, just drop files with those names into frontend/media/.
+-->
+
+<!-- A small fixed strip: brand, ops clock and the two global actions.  No tabs -
+     the whole site is one continuous scroll. -->
+<div class="topstrip">
+  <div class="brand"><span class="brand-mark">PK</span><span class="brand-name">Airline Operations</span></div>
+  <div class="nav-right">
+    <span class="clock"><strong id="clock">--:--</strong></span>
+    <button id="btn-reset" class="btn btn-ghost">Reset</button>
+    <button id="btn-run-all" class="btn btn-primary">Run full day</button>
+  </div>
+</div>
+
+<main>
+
+  <!-- ===================================================== OVERVIEW -->
+  <section id="tab-overview" class="page">
+    <div class="hero">
+      <video class="hero-media" autoplay muted loop playsinline poster="media/overview.jpg"><source src="media/overview.mp4" type="video/mp4"></video>
+      <div class="hero-text">
+        <div class="eyebrow">The operating day &middot; Thursday 24 September 2026</div>
+        <h1>A day at<br>the airline</h1>
+        <p>This is a working model of a small airline on a single day: six aircraft, seven flights, twenty staff, sixteen passengers, their bags and their cargo. Scroll to see today's flights and fleet, then keep going to watch the day go wrong and recover.</p>
+        <div class="hero-stats" id="stats"></div>
+      </div>
+      <div class="scroll-cue">Scroll</div>
+    </div>
+    <div class="content">
+      <p class="lead">Today's timetable and the aircraft available to fly it. Each row is a live record. Click one to open it.</p>
+      <h2>Flight board</h2>
+      <div id="flight-board"></div>
+      <h2>Fleet</h2>
+      <div id="fleet-board"></div>
+    </div>
+  </section>
+
+  <!-- ===================================================== RECORDS -->
+  <section id="tab-records" class="page">
+    <div class="hero">
+      <video class="hero-media" autoplay muted loop playsinline poster="media/records.jpg"><source src="media/records.mp4" type="video/mp4"></video>
+      <div class="hero-text">
+        <div class="eyebrow">The records</div>
+        <h1>Every record<br>keeps its history</h1>
+        <p>An airline is never allowed to forget. When a flight is cancelled, a seat is reassigned or a captain is promoted, the old record is not deleted. It is given a new status and kept, so months later someone can still ask what was true at 05:30. Pick a type of record below and click any row to see its fields and everything that ever happened to it.</p>
+      </div>
+      <div class="scroll-cue">Scroll</div>
+    </div>
+    <div class="content">
+      <p class="lead">Choose a type of record from the menu. The table shows what exists right now. Clicking a row shows its full history above the table.</p>
+      <div class="toolbar">
+        <label>Class <select id="record-class"></select></label>
+        <input id="record-filter" type="search" placeholder="filter text...">
+        <span id="record-count" class="muted"></span>
+        <span class="muted">Click a row to see its fields and full history.</span>
+      </div>
+      <div class="split">
+        <aside id="record-detail" class="detail empty"></aside>
+        <div id="record-table" class="grow"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================== OPERATIONS -->
+  <section id="tab-operations" class="page">
+    <div class="hero">
+      <video class="hero-media" autoplay muted loop playsinline poster="media/operations.jpg"><source src="media/operations.mp4" type="video/mp4"></video>
+      <div class="hero-text">
+        <div class="eyebrow"><span id="op-count">61</span> things the airline can do</div>
+        <h1>Decisions the<br>airline makes</h1>
+        <p>Swapping an aircraft, replacing a captain, cancelling a flight: each is an operation with a rule behind it. A pilot without the right licence cannot be assigned, a grounded aircraft cannot fly. Try one below: fill in the record ids and press Run. If a rule says no, you will see why in red, and that refusal is kept in the history too.</p>
+      </div>
+      <div class="scroll-cue">Scroll</div>
+    </div>
+    <div class="content">
+      <p class="lead">The eight most commonly used operations can be seen below, and the menu adds any of the others. Fields that need a record id will suggest matching ids as you type.</p>
+      <div class="toolbar">
+        <span class="muted">Featured operations below, or pick any of them:</span>
+        <select id="op-picker"></select>
+      </div>
+      <div id="op-list"></div>
+    </div>
+  </section>
+
+  <!-- ===================================================== SCENARIOS -->
+  <section id="tab-scenarios" class="page">
+    <div class="hero">
+      <video class="hero-media" autoplay muted loop playsinline poster="media/scenarios.jpg"><source src="media/scenarios.mp4" type="video/mp4"></video>
+      <div class="hero-text">
+        <div class="eyebrow">Eight stories from the day</div>
+        <h1>When plans<br>go wrong</h1>
+        <p>A hydraulic leak found at 04:45, a captain who calls in sick, fog at an airport, a passport that is not valid. Each story starts with a normal day, breaks it, and shows how the airline recovers. It then checks that the old records are still there. Press <em>Run full day</em> at the top to play all eight in order.</p>
+      </div>
+      <div class="scroll-cue">Scroll</div>
+    </div>
+    <div class="content">
+      <p class="lead">Each story is written to run in order on the same day. Grey lines are things that happened; <span class="k-refused">refused</span> lines are rules deliberately stopping a bad action; <span class="k-check">check</span> lines are questions asked afterwards to prove the history survived.</p>
+      <div id="demo-list"></div>
+    </div>
+  </section>
+
+  <!-- ===================================================== JOURNAL -->
+  <section id="tab-journal" class="page">
+    <div class="hero">
+      <video class="hero-media" autoplay muted loop playsinline poster="media/journal.jpg"><source src="media/journal.mp4" type="video/mp4"></video>
+      <div class="hero-text">
+        <div class="eyebrow">The audit trail</div>
+        <h1>What happened,<br>minute by minute</h1>
+        <p>Every single change of the day in one list: who did what, to which record, at what time. This is the raw material the end-of-day report is built from. Type a flight number or a person's name to follow their day, or tick <em>refused only</em> to see every time a rule stopped someone.</p>
+      </div>
+      <div class="scroll-cue">Scroll</div>
+    </div>
+    <div class="content">
+      <p class="lead">Newest first. Every line names the record it touched &mdash; click it to jump to that record.</p>
+      <div class="toolbar">
+        <input id="journal-filter" type="search" placeholder="filter by flight, person, action...">
+        <label><input type="checkbox" id="journal-refused-only"> refused only</label>
+        <span id="journal-count" class="muted"></span>
+      </div>
+      <div id="journal-table"></div>
+    </div>
+  </section>
+
+  <!-- ===================================================== REPORT -->
+  <section id="tab-report" class="page">
+    <div class="hero">
+      <video class="hero-media" autoplay muted loop playsinline poster="media/report.jpg"><source src="media/report.mp4" type="video/mp4"></video>
+      <div class="hero-text">
+        <div class="eyebrow">Close of business</div>
+        <h1>The end of<br>day report</h1>
+        <p>The question management asks at the end of the day: what changed today, who was affected, and why? This page answers it from the records alone. It tells which aircraft each flight ended up on, which disruptions happened and what options were considered, what was refused, and what is still unresolved for the next day.</p>
+      </div>
+      <div class="scroll-cue">Scroll</div>
+    </div>
+    <div class="content">
+      <p class="lead">Read the flight table first: the <em>aircraft chain</em> column shows every aircraft a flight was planned on, and the passenger column shows how many ended up flown, rebooked, offloaded or cancelled.</p>
+      <div id="report"></div>
+    </div>
+  </section>
+
+  <!-- ===================================================== DESIGN -->
+  <section id="tab-design" class="page">
+    <div class="hero">
+      <video class="hero-media" autoplay muted loop playsinline poster="media/design.jpg"><source src="media/design.mp4" type="video/mp4"></video>
+      <div class="hero-text">
+        <div class="eyebrow"><span id="class-count">49</span> classes &middot; four inheritance families</div>
+        <h1>How the<br>model is built</h1>
+        <p>Everything on this site is a Python class. Some classes are specialised versions of others &mdash; a flight-deck pilot is a kind of crew member, who is a kind of employee, who is a kind of person &mdash; and that family tree is drawn below, read live from the code. Next to it is the full list of operations, and beneath that, every class with what it represents.</p>
+      </div>
+      <div class="scroll-cue">Scroll</div>
+    </div>
+    <div class="content">
+      <p class="lead">Deeper colour in the tree means a deeper level of inheritance. The one four-level chain &mdash; Record &rarr; Person &rarr; Employee &rarr; CrewMember &rarr; FlightDeckCrew &mdash; is the multi-level structure the brief asks for.</p>
+      <div id="design"></div>
+    </div>
+  </section>
+
+</main>
+
+<datalist id="all-ids"></datalist>
+<div id="toast" class="toast"></div>
+<script src="app.js"></script>
+</body>
+</html>
